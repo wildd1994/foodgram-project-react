@@ -7,7 +7,7 @@ User = get_user_model()
 
 
 def is_hex(value):
-    if value[0] != '#' and (len(value[1:]) != 3 or len(value[1:]) != 6):
+    if value[0] != '#' and (len(value) != 4 or len(value) != 7):
         raise ValidationError(
             _(f'{value} is not a HEX-color'),
             params={'value': value},
@@ -17,8 +17,6 @@ def is_hex(value):
 class Ingredient(models.Model):
     name = models.CharField(max_length=200, blank=False)
     measurement_unit = models.CharField(max_length=200)
-
-    REQUIRED_FIELDS = ['name', 'measurement_unit']
 
     def __str__(self):
         return f'{self.name}, {self.measurement_unit}'
@@ -62,7 +60,30 @@ class FavoriteRecipe(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='favorited_recipe')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='users_favorited')
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['recipe', 'user'], name='unique_list'),
+            ]
+
 
 class ShoppingCart(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='recipe_in_shopping_cart')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_shopping_cart')
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['recipe', 'user'], name='unique_list'),
+            ]
+
+
+class Subscribe(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='follower')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following')
+
+    def __str__(self):
+        return f'{self.user} подписан на {self.author}'
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'author'], name='unique_list'),
+            ]

@@ -1,13 +1,38 @@
+from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from rest_framework import mixins, viewsets, status
+from rest_framework import (
+    mixins,
+    viewsets,
+    status,
+    generics,
+    pagination
+)
 from rest_framework.response import Response
-from .models import Ingredient, Tag, Recipe, FavoriteRecipe, ShoppingCart, IngredientInRecipe
-from .serializers import IngredientSerializer, TagSerializer, RecipeSerializer, FavoriteSerializer, ShoppingCartSerializer, CreateRecipeSerializer
+from .models import (
+    Ingredient,
+    Tag,
+    Recipe,
+    FavoriteRecipe,
+    ShoppingCart,
+    IngredientInRecipe,
+    Subscribe
+)
+from .serializers import (
+    IngredientSerializer,
+    TagSerializer, RecipeSerializer,
+    FavoriteSerializer,
+    ShoppingCartSerializer,
+    CreateRecipeSerializer,
+    SubscribeSerializer,
+    SubscribeCreateSerializer
+)
 from rest_framework import permissions, views
 from .permissions import IsAuthor
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import CustomFilter
+
+User = get_user_model()
 
 
 class ListRetrieveViewSet(mixins.ListModelMixin,
@@ -168,4 +193,48 @@ class ShoppingCartDownload(views.APIView):
         return response
 
 
+class UserSubscribeListView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = SubscribeSerializer
+    http_method_names = ['get']
+    pagination_class = pagination.PageNumberPagination
+
+    def get_queryset(self):
+        follower = self.request.user
+        return User.objects.filter(following__user=follower)
+
+
+class SubscribeView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, author_id):
+        user = request.user.id
+        data = {
+            'user': user,
+            'author': author_id
+        }
+        serializer = SubscribeCreateSerializer(
+            data=data,
+            context={
+                'request': request
+            }
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+
+    def delete(self, request, author_id):
+        user = request.user
+        author = get_object_or_404(User, pk=author_id)
+        follow = Subscribe.objects.filter(author=author, user=user)
+        if follow.exists():
+            follow.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {'errors': 'Вы не подписаны на этого пользователя'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
