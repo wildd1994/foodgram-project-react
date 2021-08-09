@@ -9,5 +9,6 @@ class FoodgramUser(AbstractUser):
     last_name = models.CharField(max_length=150)
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
     USERNAME_FIELD = 'email'
+
     class Meta:
         ordering = ('id',)
