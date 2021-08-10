@@ -37,7 +37,7 @@ class Recipe(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     ingredients = models.ManyToManyField(Ingredient, through='IngredientInRecipe')
-    tags = models.ManyToManyField(Tag)
+    tags = models.ManyToManyField(Tag, related_name='tags')
     text = models.TextField()
     cooking_time = models.PositiveIntegerField()
     image = models.ImageField(upload_to='')
@@ -62,7 +62,7 @@ class FavoriteRecipe(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['recipe', 'user'], name='unique_list'),
+            models.UniqueConstraint(fields=['recipe', 'user'], name='unique_favorite_list'),
             ]
 
 
@@ -72,7 +72,7 @@ class ShoppingCart(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['recipe', 'user'], name='unique_list'),
+            models.UniqueConstraint(fields=['recipe', 'user'], name='unique_shopping_cart_list'),
             ]
 
 
@@ -85,5 +85,5 @@ class Subscribe(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['user', 'author'], name='unique_list'),
+            models.UniqueConstraint(fields=['user', 'author'], name='unique_subscribe_list'),
             ]
