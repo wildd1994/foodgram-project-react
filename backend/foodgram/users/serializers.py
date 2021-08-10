@@ -10,10 +10,12 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
     class Meta:
         model = User
-        fields = tuple(User.REQUIRED_FIELDS) + (
+        fields = (
             'id',
             'username',
             'password',
+            'last_name',
+            'first_name',
         )
 
 
@@ -22,11 +24,13 @@ class CustomUserSerializer(UserSerializer):
 
     class Meta:
         model = User
-        fields = tuple(User.REQUIRED_FIELDS) + (
+        fields = (
             'id',
             'username',
             'is_subscribe',
             'email',
+            'first_name',
+            'last_name',
         )
 
     def get_is_subscribe(self, following_user):
