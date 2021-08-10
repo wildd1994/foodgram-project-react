@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import (
@@ -15,7 +16,6 @@ from .models import (
     Recipe,
     FavoriteRecipe,
     ShoppingCart,
-    IngredientInRecipe,
     Subscribe
 )
 from .serializers import (
@@ -28,7 +28,7 @@ from .serializers import (
     SubscribeCreateSerializer
 )
 from rest_framework import permissions, views
-from .permissions import IsAuthor
+from .permissions import RecipePermissions
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import CustomFilter
 
@@ -59,7 +59,9 @@ class IngredientsViewSet(ListRetrieveViewSet):
         queryset = Ingredient.objects.all()
         ingredient_name = self.request.query_params.get('name')
         if ingredient_name is not None:
-            queryset = Ingredient.objects.filter(name__startswith=ingredient_name.lower())
+            queryset = Ingredient.objects.filter(
+                name__startswith=ingredient_name.lower()
+            )
         return queryset
 
 
@@ -75,16 +77,7 @@ class RecipeViewSet(ListCreateRetrieveUpdateDestroy):
     queryset = Recipe.objects.all()
     filter_backends = [DjangoFilterBackend]
     filterset_class = CustomFilter
-
-    def get_permissions(self):
-        if self.action in ['put', 'delete']:
-            self.permission_classes = [IsAuthor()]
-            return self.permission_classes
-        if self.action == 'post':
-            self.permission_classes = [permissions.IsAuthenticated()]
-            return self.permission_classes
-        self.permission_classes = [permissions.AllowAny()]
-        return self.permission_classes
+    permission_classes = [RecipePermissions]
 
     def get_serializer_class(self):
         if 'list' in self.action or 'retrieve' in self.action:
@@ -166,27 +159,24 @@ class ShoppingCartDownload(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        shopping_cart = request.user.user_shopping_cart.all()
-        buying_list = dict()
-        for item in shopping_cart:
-            ingredients = IngredientInRecipe.objects.filter(recipe=item.recipe)
-            for ingredient in ingredients:
-                amount = ingredient.amount
-                name = ingredient.ingredient.name
-                measurement_unit = ingredient.ingredient.measurement_unit
-
-                if name not in buying_list:
-                    buying_list[name] = {
-                        'Еденица измерения': measurement_unit,
-                        'Количество': amount
-                    }
-                else:
-                    buying_list[name]['Количество'] = buying_list[name]['Количество']+amount
+        ingredients = request.user.user_shopping_cart.select_related(
+            'recipe'
+        ).order_by(
+            'recipe__ingredients__name'
+        ).values(
+            'recipe__ingredients__name',
+            'recipe__ingredients__measurement_unit'
+        ).annotate(
+            amount=Sum('recipe__recipe__amount')
+        ).all()
 
         wishlist = []
-        for item in buying_list:
-            wishlist.append(f'{item} - {buying_list[item]["Количество"]} '
-                            f'{buying_list[item]["Еденица измерения"]} \n')
+        for ingredient in ingredients:
+            wishlist.append(
+                f'{ingredient["recipe__ingredients__name"]}'
+                f' - {ingredient["amount"]}'
+                f' {ingredient["recipe__ingredients__measurement_unit"]}'
+                f'\n')
 
         response = HttpResponse(wishlist, 'Content-Type: text/plain')
         response['Content-Disposition'] = 'attachment; filename="wishlist.txt"'
@@ -237,4 +227,3 @@ class SubscribeView(views.APIView):
             {'errors': 'Вы не подписаны на этого пользователя'},
             status=status.HTTP_400_BAD_REQUEST
         )
-
