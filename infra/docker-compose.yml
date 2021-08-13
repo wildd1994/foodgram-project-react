@@ -7,7 +7,7 @@ services:
       - postgres_data:/var/lib/postgresql/data/
     restart: always
     env_file:
-      - .env
+      - ../backend/foodgram/foodgram/.env
   frontend:
     build:
       context: ../frontend
