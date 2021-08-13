@@ -128,7 +128,8 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         IngredientInRecipe.objects.filter(recipe=instance).delete()
         for new_ingredient in new_ingredients:
             new_ingredient_id = new_ingredient['id']
-            ingredient_instance = Ingredient.objects.get(
+            ingredient_instance = get_object_or_404(
+                Ingredient,
                 id=new_ingredient_id
             )
             new_ingredient_amount = new_ingredient['amount']
@@ -137,8 +138,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                 ingredient=ingredient_instance,
                 amount=new_ingredient_amount
             )
-        recipe = Recipe.objects.filter(id=instance.id)
-        recipe.update(**validated_data)
+        instance.update(**validated_data)
         return instance
 
     def to_representation(self, instance):
