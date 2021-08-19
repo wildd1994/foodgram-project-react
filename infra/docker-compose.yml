@@ -20,8 +20,8 @@ services:
       context: ../backend
       dockerfile: Dockerfile
     volumes:
-      - static_value:/web/backend_static/
-      - media_value:/web/backend_media/
+      - static_value:/web/foodgram/backend_static/
+      - media_value:/web/foodgram/backend_media/
     depends_on:
       - db
   nginx:
