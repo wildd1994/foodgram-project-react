@@ -11,4 +11,4 @@ class RecipePermissions(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         if request.method in ['PUT', 'DELETE']:
-            return obj.user == request.user
+            return obj.author == request.user
