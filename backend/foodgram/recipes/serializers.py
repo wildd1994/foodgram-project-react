@@ -138,7 +138,11 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                 ingredient=ingredient_instance,
                 amount=new_ingredient_amount
             )
-        instance.update(**validated_data)
+        instance.name = validated_data.pop('name')
+        instance.text = validated_data.pop('text')
+        instance.cooking_time = validated_data.pop('cooking_time')
+        instance.image = validated_data.pop('image')
+        instance.save()
         return instance
 
     def to_representation(self, instance):
