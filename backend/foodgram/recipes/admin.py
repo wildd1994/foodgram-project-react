@@ -11,6 +11,8 @@ from .models import (
 
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ['name', 'measurement_unit']
+    list_filter = ('name',)
+    search_fields = ('name',)
 
 
 class TagAdmin(admin.ModelAdmin):
@@ -25,6 +27,7 @@ class MembershipInline(admin.TabularInline):
 class RecipeAdmin(admin.ModelAdmin):
     inlines = [MembershipInline]
     list_display = ['author', 'name']
+    list_filter = ('name', 'author', 'tags')
 
 
 class FavoriteRecipeAdmin(admin.ModelAdmin):
