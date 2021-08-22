@@ -22,6 +22,8 @@ services:
       - media_value:/web/foodgram/backend_media/
     depends_on:
       - db
+    env_file:
+      - ../backend/foodgram/foodgram/.env
   nginx:
     image: nginx:1.19.3
     ports:
