@@ -138,11 +138,8 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                 ingredient=ingredient_instance,
                 amount=new_ingredient_amount
             )
-        instance.name = validated_data.pop('name')
-        instance.text = validated_data.pop('text')
-        instance.cooking_time = validated_data.pop('cooking_time')
-        if validated_data.get('image') is not None:
-            instance.image = validated_data.pop('image')
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
         instance.save()
         return instance
 
