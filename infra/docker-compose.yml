@@ -16,9 +16,7 @@ services:
     depends_on:
       - db
   web:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
+    image: wildd/foodgram:latest
     volumes:
       - static_value:/web/foodgram/backend_static/
       - media_value:/web/foodgram/backend_media/
