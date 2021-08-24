@@ -40,5 +40,5 @@ class CustomUserSerializer(UserSerializer):
             return False
         return Subscribe.objects.filter(
             author=following_user,
-            user=request.user,
+            user=request.user
         ).exists()
