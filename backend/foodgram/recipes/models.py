@@ -28,6 +28,12 @@ class Ingredient(models.Model):
     class Meta:
         verbose_name = 'Интгредиент'
         verbose_name_plural = 'Ингредиенты'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'measurement_unit'],
+                name='unique_ingredient_list'
+            ),
+        ]
 
     def __str__(self):
         return f'{self.name}, {self.measurement_unit}'
@@ -147,8 +153,7 @@ class FavoriteRecipe(models.Model):
                 name='unique_favorite_list'
             ),
         ]
-        verbose_name = 'Ингредиент в рецепте'
-        verbose_name_plural = 'Ингредиенты в рецептах'
+        verbose_name = 'Избранное'
 
 
 class ShoppingCart(models.Model):
