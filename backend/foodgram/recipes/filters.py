@@ -3,10 +3,13 @@ from .models import Recipe, Tag
 
 
 class CustomFilter(filters.FilterSet):
-    tags = filters.ModelMultipleChoiceFilter(
-        field_name='tags__slug',
-        queryset=Tag.objects.all(),
-        to_field_name='slug'
+    # tags = filters.ModelMultipleChoiceFilter(
+    #     field_name='tags__slug',
+    #     queryset=Tag.objects.all(),
+    #     to_field_name='slug'
+    # )
+    tags = filters.AllValuesMultipleFilter(
+        field_name='tags__slug'
     )
     is_favorited = filters.BooleanFilter(
         method='get_favorite'
@@ -25,18 +28,18 @@ class CustomFilter(filters.FilterSet):
 
     def get_favorite(self, queryset, name, value):
         if value:
-            return Recipe.objects.filter(
+            return queryset.filter(
                 favorited_recipe__user=self.request.user
             )
-        return Recipe.objects.all().exclude(
+        return queryset.exclude(
             favorited_recipe__user=self.request.user
         )
 
     def get_shopping_cart(self, queryset, name, value):
         if value:
-            return Recipe.objects.filter(
+            return queryset.filter(
                 recipe_in_shopping_cart__user=self.request.user
             )
-        return Recipe.objects.all().exclude(
+        return queryset.exclude(
             recipe_in_shopping_cart__user=self.request.user
         )

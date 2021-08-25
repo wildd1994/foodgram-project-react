@@ -154,6 +154,7 @@ class FavoriteRecipe(models.Model):
             ),
         ]
         verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранное'
 
 
 class ShoppingCart(models.Model):
