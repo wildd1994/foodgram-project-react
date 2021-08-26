@@ -38,8 +38,13 @@ class SubscribeAdmin(admin.ModelAdmin):
     list_display = ['author', 'user']
 
 
+class IngredientInRecipeAdmin(admin.ModelAdmin):
+    list_display = ['recipe', 'ingredient', 'amount']
+
+
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(FavoriteRecipe, FavoriteRecipeAdmin)
 admin.site.register(Subscribe, SubscribeAdmin)
+admin.site.register(IngredientInRecipe, IngredientInRecipeAdmin)
