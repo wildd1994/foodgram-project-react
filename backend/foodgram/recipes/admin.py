@@ -40,6 +40,7 @@ class SubscribeAdmin(admin.ModelAdmin):
 
 class IngredientInRecipeAdmin(admin.ModelAdmin):
     list_display = ['recipe', 'ingredient', 'amount']
+    list_filter = ('recipe', 'ingredient')
 
 
 admin.site.register(Ingredient, IngredientAdmin)
